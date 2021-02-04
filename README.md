@@ -1,2 +1,2 @@
 # bhammiller.github.io
-https://bhammiller.github.io/Homework5_Q1.html
+[link text itself]: https://bhammiller.github.io/Homework5_Q1.html
