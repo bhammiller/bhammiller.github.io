@@ -1,66 +1,67 @@
 <!DOCTYPE html>
-<html>
 <head>
-	
-	<title>Quick Start - Leaflet</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+  <!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+   integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+   crossorigin=""></script>
+  <style>
+    #mapid { 
+      -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+      -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+      box-sizing: border-box;         /* Opera/IE 8+ */
 
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	
-	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" 
-    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" 
-    crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" 
-    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" 
-    crossorigin=""></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-
-	
+    /* Since this element now uses border-box sizing, the 10px of horizontal
+       padding will be drawn inside the 80% width */
+      width: 80%;
+      height: 500px;
+      padding: 0 10px;
+      
+      
+    }
+  </style>
 </head>
-<body>
+<html>
+  <body>
 
-
-
-<div id="mapid" style="width: 900px; height: 600px;"></div>
-<script>
-
-	var mymap = L.map('mapid').setView([25.165173, -37.265625], 3);
-
-    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-		maxZoom: 18,
-		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-		id: 'mapbox/streets-v11',
-		tileSize: 512,
-		zoomOffset: -1
-	}).addTo(mymap);
-
-    $.getJSON("https://raw.githubusercontent.com/bhammiller/GES_772/master/sixcountries.geojson",function(data){
-    var datalayer = L.geoJson(data ,{
-    onEachFeature: function(feature, featureLayer) {
-    featureLayer.bindPopup("Country: " + feature.properties.name + "<br/>Pop: " + feature.properties.population );
-    },
-    style: function(feature) {
-            switch (feature.properties.continent) {
-                case 'Europe': return {color: "#0717f8"};
-                case 'South America':   return {color: "#800a15"};
-                case 'North America':   return {color: "#800a15"};
-            }
-    }    
-    }).addTo(mymap);
-    });
+    <h1>My First Heading</h1>
+    <p>My first paragraph.</p>
+    <br>
+    <div id="mapid"></div>
+    <div id="latLon">39.0941938,-77.2027823</div>
     
+    <script>
+      var mymap = L.map('mapid').setView([39.0941938,-77.2027823], 13);
+      
+      L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/streets-v11',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: ''
+}).addTo(mymap);
+      
+      var circle = L.circle([39.0941938,-77.2027823], {
+        color: 'blue',
+        fillColor: '#f03',
+        fillOpacity: 0.5,
+        radius: 500
+      }).addTo(mymap);
+      
+      circle.bindPopup("I am a circle.");
+      
+      
+      function onMapHover(e) {
+        var newLatLng = String(e.latlng).replace("LatLng(", "").replace(")", "")
+        document.getElementById("latLon").innerHTML = newLatLng;
+      }
 
-	
-
-	
-
-</script>
-
-
-
-</body>
+      mymap.on('mousemove', onMapHover);
+     
+      
+    </script>
+  </body>
 </html>
