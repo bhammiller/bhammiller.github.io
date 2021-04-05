@@ -7,6 +7,8 @@
  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
    crossorigin=""></script>
+   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+   <script src="https://d3js.org/d3.v6.min.js"></script>
   <style>
     #mapid { 
       -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
@@ -26,32 +28,33 @@
 <html>
   <body>
 
-    <h1>My First Heading</h1>
-    <p>My first paragraph.</p>
+    <h1>Neighborhoods, Bike Friendly Routes, and Schools ( Middle & High) of Spokane Washington</h1>
+    <p>Spokane, Washington is a city in the eastern part of Washington State.  
+      Lying alongside the beautiful Spokane River, Spokane offers residents and visitors a wealth of natural and cultural attractions.  
+      <br>South of the river lies the South Hill part of the city, a pleasant suburban area with several parks including the Manito Park and Botanical Gardens.  
+      East of the city proper lies the Spokane Valley, <br>a less green yet still beautiful part of the Spokane Area.  
+      Represented by light green overlays are the neighborhoods of the city of Spokane.  
+      As befitting a community oriented city there are quite a few <br>bike friendly roads represented here in purple, with less of such routes in south presumably because of the steeper terrain.  
+      Also of note are the number of <span style="color: red">middle</span> and <span style="color: blue">high</span> schools in the valley <br>compared to the city neighborhoods, a clear sign of the growth and expansion of the population into Spokane Valley.  
+      One possible use of the information presented here is by a family of bike <br>enthusiasts with children of middle or high school looking to mover to Spokane.  
+      The family can use this map to gain insight into which neighborhood is more suitable for them.</p>
     <br>
     <div id="mapid"></div>
     <div id="latLon">39.0941938,-77.2027823</div>
     
     <script>
-      var mymap = L.map('mapid').setView([39.0941938,-77.2027823], 13);
-      
+      var mymap = L.map('mapid').setView([47.673838, -117.416357], 12);
+      // Loads Basemap
       L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     maxZoom: 18,
     id: 'mapbox/streets-v11',
     tileSize: 512,
     zoomOffset: -1,
-    accessToken: ''
+    accessToken: 'pk.eyJ1IjoiYmhhbW1pbGxlciIsImEiOiJja24yZWx4dW0xM2Q0MnBvMmpvYXo0ZnB4In0.LVVEKEcdH8EpNf53lauOeQ'
 }).addTo(mymap);
       
-      var circle = L.circle([39.0941938,-77.2027823], {
-        color: 'blue',
-        fillColor: '#f03',
-        fillOpacity: 0.5,
-        radius: 500
-      }).addTo(mymap);
       
-      circle.bindPopup("I am a circle.");
       
       
       function onMapHover(e) {
@@ -60,8 +63,74 @@
       }
 
       mymap.on('mousemove', onMapHover);
-     
+      mymap.createPane("500").style.zIndex = 500;
+      mymap.createPane("550").style.zIndex = 550;
+      mymap.createPane("600").style.zIndex = 600;  
+      // School Marker Style
+      var schoolMarkerOptions = {
+        pane:'600',
+        radius: 5,
+        fillColor: "#ff7800",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      };
       
+    // Loads Spokane Neighborhood Layer
+    var url1="https://opendata.arcgis.com/datasets/5e5f611016504acf9340a0218b772068_0.geojson";
+    var datalayer1 = L.geoJson(null ,{
+        onEachFeature: function(feature, featureLayer) {
+          featureLayer.bindPopup("<b>Neighborhood:</b><br>" + feature.properties.Name);
+        },
+        pane: "500",
+        color:"#5c9c25",
+        fillColor:"#20e361",
+        fillOpacity:0.1,
+      });
+      $.getJSON(url1, function(data) {
+        datalayer1.addData(data);
+      });
+      
+      datalayer1.addTo(mymap);
+    // Loads Spokane Bike Friendly Routes    
+    var url2="https://opendata.arcgis.com/datasets/ae6d1ed116df4568a5341bd9343b2e1f_0.geojson?where=Current_%20%3D%20%27Bike%20Friendly%20Route%27%20AND%20Future%20%3D%20%27Bike%20Friendly%20Route%27";
+    var datalayer2 = L.geoJson(null ,{
+        onEachFeature: function(feature, featureLayer) {
+          featureLayer.bindPopup("<b>Bike Friendly Route<br>Street: </b>"+ feature.properties.Street
+          + "<br>From " + feature.properties.FromStreet
+          + " to " + feature.properties.ToStreet);
+        },
+        pane: "550",
+        color: "#d327f5"
+      });
+      $.getJSON(url2, function(data) {
+        datalayer2.addData(data);
+      });
+      datalayer2.addTo(mymap);
+    // Loads Spokane Middle and High Schools
+    var url3= "https://opendata.arcgis.com/datasets/fbc9d115d77d4badbaf8410ff8b2bd2a_0.geojson?where=%20(FCode%20%3D%20'School%3A%20Middle%20School'%20OR%20FCode%20%3D%20'School%3A%20High%20School')%20";
+    var datalayer3 = L.geoJson(null ,{
+        onEachFeature: function(feature, featureLayer) {
+          featureLayer.bindPopup("<b>Name: </b>" +feature.properties.Name 
+          + "<br><b>Facility Type:</b> " + feature.properties.FCode.replace('School: ',''));
+        },
+        pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, schoolMarkerOptions);
+        },
+        style: function(feature) {
+            switch (feature.properties.FCode) {
+              // Blue  
+              case 'School: High School': return {color: "#0717f8",fillColor:"#0717f8"};
+              // Red
+              case 'School: Middle School': return {color: "#e62309",fillColor: "#e62309"};
+            }
+        }
+      });
+      $.getJSON(url3, function(data) {
+        datalayer3.addData(data);
+      });
+      datalayer3.addTo(mymap);
     </script>
   </body>
 </html>
